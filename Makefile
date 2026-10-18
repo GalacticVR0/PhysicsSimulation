@@ -7,6 +7,9 @@ SRCS := $(wildcard src/*.cpp)
 OBJS := $(SRCS:.cpp=.o)
 
 all: $(TARGET)
+	$(RM) $(OBJS)
+
+.PHONY: all clean
 
 # Link object files into the final executable
 $(TARGET): $(OBJS)
@@ -18,4 +21,4 @@ $(TARGET): $(OBJS)
 
 # Clean up build files
 clean:
-	$(RM) $(OBJS) $(TARGET)
+	$(RM) src/*.o $(TARGET)
