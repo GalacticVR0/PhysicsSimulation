@@ -1,0 +1,5 @@
+Physics Simulation
+
+
+Issues
+-When an object collides with another object that is on the ground the falling object gets placed on the bottom and pushes the other objects up

@@ -8,6 +8,9 @@ namespace Physics {
 }
 
 namespace core {
+
+    const int OBJSIZE = 10;
+
     struct Vector2 {
         float x = 0.0f;
         float y = 0.0f;
