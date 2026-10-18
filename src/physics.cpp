@@ -14,7 +14,7 @@ namespace Physics {
     }
 
 
-    void checkCollisions(std::vector<PhysicsObject>& objects, SDL_Renderer *renderer) {
+    void checkGroundCollisions(std::vector<PhysicsObject>& objects, SDL_Renderer *renderer) {
         for (PhysicsObject& object : objects) {
             float groundLevel = core::getGroundLevel(renderer);
             if (object.position.y >= groundLevel) {
