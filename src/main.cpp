@@ -1,7 +1,6 @@
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-#include <new>
 #include <vector>
 
 #include "physics.h"
@@ -13,7 +12,7 @@ struct AppState {
 };
 
 SDL_AppResult SDL_AppInit(void **appstate, int, char **) {
-    auto *state = new (std::nothrow) AppState{};
+    auto *state = new AppState{};
     if (state == nullptr) {
         return SDL_APP_FAILURE;
     }
