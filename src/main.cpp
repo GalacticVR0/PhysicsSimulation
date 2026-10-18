@@ -62,6 +62,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     float deltaTime = 1.0f / 60.0f; // Assuming a fixed time step for simplicity
     Physics::updateGravity(deltaTime, state->objects);
     core::draw(state->renderer, state->objects);
+    Physics::checkCollisions(state->objects, state->renderer);
 
     SDL_RenderPresent(state->renderer);
     return SDL_APP_CONTINUE;

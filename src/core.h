@@ -14,4 +14,5 @@ namespace core {
     };
 
     void draw(SDL_Renderer *renderer, std::vector<Physics::PhysicsObject> &objects);
+    float getGroundLevel(SDL_Renderer *renderer);
 }

@@ -9,4 +9,13 @@ namespace core {
             SDL_RenderFillRect(renderer, &rect);
         }
     }
+
+    float getGroundLevel(SDL_Renderer *renderer) {
+        int width = 0;
+        int height = 0;
+        if (SDL_GetRenderOutputSize(renderer, &width, &height)) {
+            return static_cast<float>(height) - 10.0f;
+        }
+        return 0.0f;
+    }
 }

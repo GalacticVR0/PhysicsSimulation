@@ -11,7 +11,8 @@ namespace Physics {
         core::Vector2 velocity{};
     };
 
-    const float GRAVITY = 1.0f;
+    const float GRAVITY = 2.0f;
 
     void updateGravity(float deltaTime, std::vector<PhysicsObject>& objects);
+    void checkCollisions(std::vector<PhysicsObject>& objects, SDL_Renderer *renderer);
 }
