@@ -2,6 +2,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <imgui.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlrenderer3.h>
 
 #include <vector>
 
@@ -11,31 +13,45 @@ struct AppState {
 	SDL_Window* window = nullptr;
 	SDL_Renderer* renderer = nullptr;
 	std::vector<Physics::PhysicsObject> objects;
+
+	float gravity = Physics::GRAVITY;
 };
 
 SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
-	auto* state = new AppState{};
-	if (state == nullptr) {
-		return SDL_APP_FAILURE;
-	}
-
-	*appstate = state;
+	*appstate = new AppState();
+	AppState& app = *static_cast<AppState*>(*appstate);
 
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		SDL_Log("Failed to initialize SDL: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
 	}
-
-	if (!SDL_CreateWindowAndRenderer("Physics", 1280, 720, 0, &state->window, &state->renderer)) {
+	if (!SDL_CreateWindowAndRenderer("Physics", 1280, 720, 0, &app.window, &app.renderer)) {
 		SDL_Log("Failed to create window and renderer: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
 	}
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+
+	ImGui::StyleColorsDark();
+
+	// Initialize ImGui renderer for sdl
+	ImGui_ImplSDL3_InitForSDLRenderer(app.window, app.renderer);
+	ImGui_ImplSDLRenderer3_Init(app.renderer);
 
 	return SDL_APP_CONTINUE;
 }
 
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 	auto* state = static_cast<AppState*>(appstate);
+	// Pass the event to ImGui for processing
+	ImGui_ImplSDL3_ProcessEvent(event);
+
+	if (ImGui::GetIO().WantCaptureMouse) {
+		// Prevents SDL from processing mouse events intended for ImGui
+		return SDL_APP_CONTINUE;
+	}
 	switch (event->type) {
 		case SDL_EVENT_QUIT:
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
@@ -54,29 +70,48 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 }
 
 SDL_AppResult SDL_AppIterate(void* appstate) {
-	auto* state = static_cast<AppState*>(appstate);
+	auto& state = *static_cast<AppState*>(appstate);
 
-	SDL_SetRenderDrawColor(state->renderer, 18, 24, 32, 255);
-	SDL_RenderClear(state->renderer);
+	// Begin a new ImGui frame
+	ImGui_ImplSDLRenderer3_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
 
-	core::draw(state->renderer, state->objects);
+	ImGui::Begin("Physics Simulation", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::InputFloat("Gravity", &state.gravity, 0.1f, 1.0f, "%.2f");
+	ImGui::End();
+
+	ImGui::Render();
+
+	// Begin SDL rendering
+	SDL_SetRenderDrawColor(state.renderer, 18, 24, 32, 255);
+	SDL_RenderClear(state.renderer);
+
+	core::draw(state.renderer, state.objects);
 
 	// Update physics
 	float deltaTime = 1.0f / 60.0f;	 // Assuming a fixed time step for simplicity
-	Physics::updateGravity(deltaTime, state->objects);
-	Physics::checkCollisions(state->objects);
-	Physics::checkGroundCollisions(state->objects, state->renderer);
+	Physics::updateGravity(deltaTime, state.objects);
+	Physics::checkCollisions(state.objects);
+	Physics::checkGroundCollisions(state.objects, state.renderer);
 
-	SDL_RenderPresent(state->renderer);
+	// Add Imgui to the top of the SDL draw call
+	ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), state.renderer);
+	SDL_RenderPresent(state.renderer);
 	return SDL_APP_CONTINUE;
 }
 
 void SDL_AppQuit(void* appstate, SDL_AppResult) {
-	auto* state = static_cast<AppState*>(appstate);
-	if (state != nullptr) {
-		SDL_DestroyRenderer(state->renderer);
-		SDL_DestroyWindow(state->window);
-		delete state;
+	ImGui_ImplSDLRenderer3_Shutdown();
+	ImGui_ImplSDL3_Shutdown();
+	ImGui::DestroyContext();
+
+	auto& state = *static_cast<AppState*>(appstate);
+	if (&state) {
+		SDL_DestroyRenderer(state.renderer);
+		SDL_DestroyWindow(state.window);
+		delete &state;
 	}
-	SDL_Quit();
+
+	return;
 }
