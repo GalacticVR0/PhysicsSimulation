@@ -8,7 +8,7 @@
 
 namespace core {
 
-const int OBJSIZE = 10;
+const int OBJSIZE = 1;
 
 struct Vector2 {
 	float x = 0.0f;
