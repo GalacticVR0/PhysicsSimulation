@@ -30,9 +30,6 @@ void PhysicsHandler::checkCollisions(std::vector<Physics::Object>& objects) {
 					// Object is above the other object
 					object.position.y = other.position.y - core::OBJSIZE;
 					object.velocity.y = 0.0f;  // Stop vertical movement
-				} else {
-					// Object is below the other object
-					object.position.y = other.position.y + core::OBJSIZE;
 				}
 			}
 		}
