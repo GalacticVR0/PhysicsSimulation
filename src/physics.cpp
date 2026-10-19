@@ -1,22 +1,24 @@
 #include "physics.h"
 
-namespace Physics {
-void updateGravity(float deltaTime, std::vector<PhysicsObject>& objects) {
+#include "core.h"
+
+using namespace Physics;
+void PhysicsHandler::updateGravity(float deltaTime, std::vector<Physics::Object>& objects) {
 	if (deltaTime <= 0.0f) {
 		return;
 	}
-	for (PhysicsObject& object : objects) {
+	for (Physics::Object& object : objects) {
 		object.velocity.x += 0.0f * deltaTime;
-		object.velocity.y += GRAVITY * deltaTime;
+		object.velocity.y += this->gravity * deltaTime;
 		object.position.x += object.velocity.x * deltaTime;
 		object.position.y += object.velocity.y * deltaTime;
 	}
 }
 
-void checkCollisions(std::vector<PhysicsObject>& objects) {
+void PhysicsHandler::checkCollisions(std::vector<Physics::Object>& objects) {
 	// Check collisions using AABB (Axis-Aligned Bounding Box) method with other objects
-	for (PhysicsObject& object : objects) {
-		for (PhysicsObject& other : objects) {
+	for (Physics::Object& object : objects) {
+		for (Physics::Object& other : objects) {
 			if (&object == &other) {
 				continue;  // Skip self-collision
 			}
@@ -37,13 +39,12 @@ void checkCollisions(std::vector<PhysicsObject>& objects) {
 	}
 }
 
-void checkGroundCollisions(std::vector<PhysicsObject>& objects, SDL_Renderer* renderer) {
-	for (PhysicsObject& object : objects) {
+void PhysicsHandler::checkGroundCollisions(std::vector<Physics::Object>& objects, SDL_Renderer* renderer) {
+	for (Physics::Object& object : objects) {
 		float groundLevel = core::getGroundLevel(renderer);
 		if (object.position.y >= groundLevel) {
 			object.position.y = groundLevel;
 			object.velocity.y = 0.0f;  // Stop vertical movement
 		}
 	}
-}
-}  // namespace Physics
+};

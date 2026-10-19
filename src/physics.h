@@ -1,19 +1,21 @@
 #pragma once
+#include <SDL3/SDL.h>
 
 #include <vector>
-#include "core.h"
 
+#include "utils.hpp"
 namespace Physics {
-    
+struct Object {
+	Vector2 position{};
+	Vector2 velocity{};
+};
 
-    struct PhysicsObject {
-        core::Vector2 position{};
-        core::Vector2 velocity{};
-    };
+class PhysicsHandler {
+   public:
+	float gravity = 2.0f;
 
-    const float GRAVITY = 2.0f;
-
-    void updateGravity(float deltaTime, std::vector<PhysicsObject>& objects);
-    void checkCollisions(std::vector<PhysicsObject>& objects);
-    void checkGroundCollisions(std::vector<PhysicsObject>& objects, SDL_Renderer *renderer);
-}
+	void updateGravity(float deltaTime, std::vector<Object>& objects);
+	void checkCollisions(std::vector<Object>& objects);
+	void checkGroundCollisions(std::vector<Object>& objects, SDL_Renderer* renderer);
+};
+}  // namespace Physics

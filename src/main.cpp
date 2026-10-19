@@ -7,14 +7,16 @@
 
 #include <vector>
 
+#include "core.h"
 #include "physics.h"
+#include "utils.hpp"
 
 struct AppState {
 	SDL_Window* window = nullptr;
 	SDL_Renderer* renderer = nullptr;
-	std::vector<Physics::PhysicsObject> objects;
+	std::vector<Physics::Object> objects;
 
-	float gravity = Physics::GRAVITY;
+	Physics::PhysicsHandler physicsHandler;
 };
 
 SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
@@ -33,6 +35,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
+	io.IniFilename = NULL;	// Disable persistent window settings
 
 	ImGui::StyleColorsDark();
 
@@ -58,8 +61,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 			return SDL_APP_SUCCESS;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			if (event->button.button == SDL_BUTTON_LEFT) {
-				core::Vector2 position{ event->button.x, event->button.y };
-				state->objects.push_back(Physics::PhysicsObject{ position, core::Vector2{ 0.0f, 0.0f } });
+				Vector2 position{ event->button.x, event->button.y };
+				state->objects.push_back(Physics::Object{ position, Vector2{ 0.0f, 0.0f } });
 			}
 			break;
 		default:
@@ -78,7 +81,7 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	ImGui::NewFrame();
 
 	ImGui::Begin("Physics Simulation", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::InputFloat("Gravity", &state.gravity, 0.1f, 1.0f, "%.2f");
+	ImGui::InputFloat("Gravity", &state.physicsHandler.gravity, 0.1f, 1.0f, "%.2f");
 	ImGui::End();
 
 	ImGui::Render();
@@ -91,9 +94,9 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 
 	// Update physics
 	float deltaTime = 1.0f / 60.0f;	 // Assuming a fixed time step for simplicity
-	Physics::updateGravity(deltaTime, state.objects);
-	Physics::checkCollisions(state.objects);
-	Physics::checkGroundCollisions(state.objects, state.renderer);
+	state.physicsHandler.updateGravity(deltaTime, state.objects);
+	state.physicsHandler.checkCollisions(state.objects);
+	state.physicsHandler.checkGroundCollisions(state.objects, state.renderer);
 
 	// Add Imgui to the top of the SDL draw call
 	ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), state.renderer);

@@ -1,21 +1,20 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+
 #include <vector>
 
-namespace Physics {
-    struct PhysicsObject;
-}
+#include "physics.h"
 
 namespace core {
 
-    const int OBJSIZE = 10;
+const int OBJSIZE = 10;
 
-    struct Vector2 {
-        float x = 0.0f;
-        float y = 0.0f;
-    };
+struct Vector2 {
+	float x = 0.0f;
+	float y = 0.0f;
+};
 
-    void draw(SDL_Renderer *renderer, std::vector<Physics::PhysicsObject> &objects);
-    float getGroundLevel(SDL_Renderer *renderer);
-}
+void draw(SDL_Renderer* renderer, std::vector<Physics::Object>& objects);
+float getGroundLevel(SDL_Renderer* renderer);
+}  // namespace core
