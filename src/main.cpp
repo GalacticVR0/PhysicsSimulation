@@ -16,17 +16,21 @@ struct AppState {
 	SDL_Renderer* renderer = nullptr;
 	std::vector<Physics::Object> objects;
 
+	deltaTime delta;
 	Physics::PhysicsHandler physicsHandler;
+
+	AppState(Uint64 firstTick) : delta(firstTick) {}
 };
 
 SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
-	*appstate = new AppState();
-	AppState& app = *static_cast<AppState*>(*appstate);
-
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		SDL_Log("Failed to initialize SDL: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
 	}
+
+	*appstate = new AppState(SDL_GetTicksNS());
+	AppState& app = *static_cast<AppState*>(*appstate);
+
 	if (!SDL_CreateWindowAndRenderer("Physics", 1280, 720, 0, &app.window, &app.renderer)) {
 		SDL_Log("Failed to create window and renderer: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
@@ -93,7 +97,7 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	core::draw(state.renderer, state.objects);
 
 	// Update physics
-	float deltaTime = 1.0f / 60.0f;	 // Assuming a fixed time step for simplicity
+	float deltaTime = state.delta.get() / 1000.0f;
 	state.physicsHandler.updateGravity(deltaTime, state.objects);
 	state.physicsHandler.checkCollisions(state.objects);
 	state.physicsHandler.checkGroundCollisions(state.objects, state.renderer);

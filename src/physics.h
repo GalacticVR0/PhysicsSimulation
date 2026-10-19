@@ -12,7 +12,7 @@ struct Object {
 
 class PhysicsHandler {
    public:
-	float gravity = 2.0f;
+	float gravity = 500.0f;
 
 	void updateGravity(float deltaTime, std::vector<Object>& objects);
 	void checkCollisions(std::vector<Object>& objects);
